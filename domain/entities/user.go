@@ -13,7 +13,7 @@ type User struct {
 	FirstName string             `json:"first_name,omitempty" bson:"first_name" binding:"required,min=3,max=30"`
 	LastName  string             `json:"last_name,omitempty" bson:"last_name" binding:"required,min=3,max=30"`
 	Email     string             `json:"email,omitempty" bson:"email" binding:"required,email"`
-	Password  string             `json:"password,omitempty" bson:"password" binding:"required,min=8,max=30,StrongPassword"`
+	Password  string             `json:"password,omitempty" bson:"password" binding:"required,min=8,max=30"`
 	Role      string             `json:"role,omitempty" bson:"role"`
 	IsActive  bool               `json:"is_active,omitempty" bson:"is_active"`
 }
@@ -30,6 +30,9 @@ type UserUserCase interface {
 	VerifyEmail(ctx context.Context, Verificationtoken string)	error
 	Login(ctx context.Context, loginRequest *forms.LoginForm) (*forms.LoginResponseForm, error)
 	RefreshToken(ctx context.Context, request *forms.RefreshTokenRequestForm,refreshDataIDStr string) (*forms.RefreshTokenResponseForm, error)
+	DeleteUser(c context.Context, userID string) error
+	GetProfile(ctx context.Context, userID string) (*User, error)
+	GetUsers(ctx context.Context) ([]*User, error)
 }
 type UserRepository interface {
 	SignupUser(ctx context.Context,user *User) error
@@ -42,4 +45,6 @@ type UserRepository interface {
 	ExtractIDFromToken(requestToken string, secret string) (string, error) 
 	GetRefreshData(c context.Context, id string) (*RefreshData, error)
 	DeleteRefreshData(c context.Context, id string) error
+	DeleteUser(c context.Context, userID string) error
+	GetUsers(ctx context.Context) ([]*User, error)
 }

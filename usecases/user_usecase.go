@@ -26,7 +26,16 @@ func NewUserUserCase(UserRepository entities.UserRepository) *userUserCase {
 		UserRepository: UserRepository,
 	}
 }
+func (uu *userUserCase) GetUsers(ctx context.Context) ([]*entities.User, error) {
+	return uu.UserRepository.GetUsers(ctx)
+}
 
+func (uu *userUserCase) GetProfile(ctx context.Context, userID string) (*entities.User, error) {
+	return uu.UserRepository.GetUserById(ctx, userID)
+}
+func (uu *userUserCase)DeleteUser(c context.Context, userID string) error {
+	return uu.UserRepository.DeleteUser(c, userID)
+}
 func (uu *userUserCase) SignupUser(ctx context.Context,signuprequest *forms.SignupForm) error {
 	count,err:=uu.UserRepository.AccountExists(ctx,signuprequest.Email)
 	if err != nil {
@@ -216,7 +225,7 @@ func (uu *userUserCase) RefreshToken(ctx context.Context, request *forms.Refresh
 	var refreshData entities.RefreshData
 	refreshData.Id = ID
 	refreshData.UserId = user.ID.Hex()
-	refreshData.Expire_date = refreshData.Expire_date
+	refreshData.Expire_date = time.Now().Add(time.Hour * time.Duration(RefreshTokenExpiryHour))
 	refreshData.RefreshToken = refreshToken
 
 	uu.UserRepository.CreateRefreshData(ctx, refreshData)

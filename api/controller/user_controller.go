@@ -17,7 +17,45 @@ func NewUserController(userusecase entities.UserUserCase) *UserController {
 		UserUsecase: userusecase,
 	}
 }
+func (uc *UserController) GetUsers(c *gin.Context) {
 
+	users, err := uc.UserUsecase.GetUsers(c.Request.Context())
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, users)
+}
+
+func (uc *UserController) GetProfile(c *gin.Context) {
+	id, exists := c.Get("x-user-id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid x-user-id"})
+		return
+	}
+	idstr, ok := id.(string)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid x-user-id"})
+		return
+	}
+	
+	user, err := uc.UserUsecase.GetProfile(c.Request.Context(), idstr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, user)
+}
+
+func (uc *UserController) DeleteUser(c *gin.Context) {
+	id:=c.Param("id")
+
+	if err := uc.UserUsecase.DeleteUser(c.Request.Context(), id); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+}
 func (uc *UserController) SignupUser(c *gin.Context) {
 	var signuprequest forms.SignupForm
 
@@ -29,6 +67,8 @@ func (uc *UserController) SignupUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})	
 		return
 	}
+
+	c.JSON(http.StatusCreated, gin.H{"message": "email verification link sent"})
 }
 func (uc *UserController) VerifyEmail(c *gin.Context) {
 	Verificationtoken := c.Param("token")
@@ -85,3 +125,5 @@ func (uc *UserController) RefreshToken(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, refreshTokenResponse)
 }
+
+

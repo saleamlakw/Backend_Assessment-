@@ -18,8 +18,8 @@ type userRepository struct {
 
 func NewUserRepository(client *mongo.Client) *userRepository {
 	return &userRepository{
-		UserCollection : client.Database("loan").Collection("users"),
-		RefreshCollection : client.Database("loan").Collection("refresh"),
+		UserCollection : client.Database("book").Collection("users"),
+		RefreshCollection : client.Database("book").Collection("refresh"),
 	}
 }
 func (ur *userRepository) SignupUser(ctx context.Context,user *entities.User) error {
@@ -117,3 +117,39 @@ func (ur *userRepository) DeleteRefreshData(c context.Context, id string) error 
 	}
 	return nil
 }
+
+func (ur *userRepository) DeleteUser(c context.Context, userID string) error {
+	id, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return err
+	}
+	filter := bson.M{"_id": id}
+	res, err := ur.UserCollection.DeleteOne(c, filter)
+
+	if res.DeletedCount == 0 {
+		return mongo.ErrNoDocuments
+	}
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func  (ur *userRepository)  GetUsers(ctx context.Context) ([]*entities.User, error) {
+	var users []*entities.User
+	cursor, err := ur.UserCollection.Find(ctx, bson.M{})
+	if err != nil {
+		return nil, err
+	}
+	for cursor.Next(ctx) {
+		var user entities.User
+		if err = cursor.Decode(&user); err != nil {
+			return nil, err
+		}
+		users = append(users, &user)
+	}
+	return users, nil
+}
+

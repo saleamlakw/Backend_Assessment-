@@ -32,14 +32,14 @@ func SendVerificationEmail(recipientEmail string, VerificationToken string) erro
 
 // func SendOtpVerificationEmail(recipientEmail string, otp string) error {
 // 	// Email configuration
-// 	from := env.SenderEmail
-// 	password := env.SenderPassword
-// 	smtpHost := env.SmtpHost
-// 	smtpPort := env.SmtpPort
+// 	from := os.Getenv("SENDER_EMAIL")
+// 	password := os.Getenv("SENDER_PASSWORD")
+// 	smtpHost := os.Getenv("SMTP_HOST")
+// 	smtpPort := os.Getenv("SMTP_PORT")
 
 // 	subject := "Subject: Account Verification\n"
 // 	mime := "MIME-Version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
-// 	body := OTPEmailTemplate(otp,env)
+// 	body := OTPEmailTemplate(otp)
 // 	message := []byte(subject + mime + "\n" + body)
 // 	auth := smtp.PlainAuth("", from, password, smtpHost)
 
